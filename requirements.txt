@@ -3,3 +3,5 @@ uvicorn
 SQLAlchemy
 mysql-connector-python
 python-dotenv
+mysql-connector-python
+pymysql
