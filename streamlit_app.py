@@ -19,10 +19,11 @@ def clear_login_inputs():
 API_KEY = os.getenv("API_KEY")
 headers = {"api-key": API_KEY}
 if st.button("Login"):
-    response = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/docs%20%20for%20test%20api/login", data={
+    response = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/login", data={
         "username": username,
         "password": password
     }, headers=headers)
+    print(response.status_code)
 
     if response.status_code == 200:
         token = response.json()["access_token"]
@@ -47,7 +48,7 @@ if "token" in st.session_state:
         }
         task_data = {"title": title, "description": desc}
 
-        res = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/docs%20%20for%20test%20api/tasks/", json=task_data, headers=headers)
+        res = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/i/tasks/", json=task_data, headers=headers)
 
         if res.status_code == 200:
             st.success("Task created!")
@@ -63,7 +64,7 @@ if "token" in st.session_state:
             "Authorization": f"Bearer {st.session_state['token']}",
             "api-key": API_KEY
         }
-        response = requests.get("https://fastapi-with-streamlit-r66r.onrender.com/docs%20%20for%20test%20api/tasks/", headers=headers)
+        response = requests.get("https://fastapi-with-streamlit-r66r.onrender.com/i/tasks/", headers=headers)
 
         if response.status_code == 200:
             tasks = response.json()
