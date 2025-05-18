@@ -34,7 +34,11 @@ def get_db():
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Task API!"}
+    return {"message": "Welcome to the Task API!",
+    "author": "Nitesh Upadhyay",
+    "email": "upadhyay02nitesh@gmail.com",
+    "advice":"https://fastapi-with-streamlit-r66r.onrender.com/docs  for test api",
+    "secret_api":"tracker626453"}
 
 @app.post("/register", response_model=schema.UserOut,dependencies=[Depends(verify_api_key)])
 def register(user: schema.UserCreate, db: Session = Depends(get_db)):
