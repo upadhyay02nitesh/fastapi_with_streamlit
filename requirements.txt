@@ -5,4 +5,11 @@ mysql-connector-python
 python-dotenv
 mysql-connector-python
 pymysql
-passlib
+
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
+sqlalchemy==2.0.19
+python-dotenv==1.0.0
+passlib[bcrypt]==1.7.4
+python-jose==3.3.0
+pydantic==1.10.11
