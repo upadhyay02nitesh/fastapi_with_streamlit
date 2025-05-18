@@ -48,7 +48,7 @@ if "token" in st.session_state:
         }
         task_data = {"title": title, "description": desc}
 
-        res = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/i/tasks/", json=task_data, headers=headers)
+        res = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/tasks/", json=task_data, headers=headers)
 
         if res.status_code == 200:
             st.success("Task created!")
@@ -64,7 +64,7 @@ if "token" in st.session_state:
             "Authorization": f"Bearer {st.session_state['token']}",
             "api-key": API_KEY
         }
-        response = requests.get("https://fastapi-with-streamlit-r66r.onrender.com/i/tasks/", headers=headers)
+        response = requests.get("https://fastapi-with-streamlit-r66r.onrender.com/tasks/", headers=headers)
 
         if response.status_code == 200:
             tasks = response.json()
