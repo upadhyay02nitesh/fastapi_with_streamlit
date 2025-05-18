@@ -32,6 +32,10 @@ def get_db():
     finally:
         db.close()
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Task API!"}
+
 @app.post("/register", response_model=schema.UserOut,dependencies=[Depends(verify_api_key)])
 def register(user: schema.UserCreate, db: Session = Depends(get_db)):
     hashed_password = auth.hash_password(user.password)
