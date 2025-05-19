@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 st.set_page_config(page_title="Task Tracker", layout="centered")
 
-st.title("📝 Task Tracker Login")
+st.title("📝 Taskit – Your Task Management Buddy")
 
 # --- Load environment ---
 load_dotenv()
@@ -15,6 +15,21 @@ BASE_URL = "https://fastapi-with-streamlit-r66r.onrender.com"
 # --- Session State Defaults ---
 if "token" not in st.session_state:
     st.session_state.token = None
+
+with st.expander("🔐 Register New Account"):
+    reg_username = st.text_input("New Username", key="reg_user")
+    reg_password = st.text_input("New Password", type="password", key="reg_pass")
+
+    if st.button("Register"):
+        headers = {"api-key": API_KEY}
+        payload = {"username": reg_username, "password": reg_password}
+
+        res = requests.post(f"{BASE_URL}/register", json=payload, headers=headers)
+
+        if res.status_code == 200:
+            st.success("🎉 Registration successful! You can now log in.")
+        else:
+            st.error(f"❌ Registration failed: {res.json().get('detail', 'Unknown error')}")
 
 # --- Login Section ---
 username = st.text_input("Username", key="username")
@@ -47,7 +62,7 @@ if st.session_state.get("token"):
             # Clear token from session
             st.session_state["token"] = None
             # Rerun app to reset view to login form
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Logout failed.")
 
@@ -133,3 +148,25 @@ if st.session_state.token:
             st.success("🗑️ Task deleted successfully!")
         else:
             st.error(f"❌ Delete failed: {res.json().get('detail', 'Unknown error')}")
+
+
+with st.expander("📘 About Taskit – Your Task Management Buddy", expanded=True):
+    st.markdown("""
+    **Taskit** is a real-world **task management application** built using **microservices architecture** to deliver a clean, fast, and reliable user experience.
+
+    - 🖥️ **Frontend**: Built with [Streamlit](https://streamlit.io), deployed to **Streamlit Cloud** for a seamless user interface.
+    - ⚙️ **Backend**: Developed using [FastAPI](https://fastapi.tiangolo.com/), deployed to **Render** for scalable and fast API responses.
+    - 🗄️ **Database**: Hosted using **Railway (free tier)** for remote, cloud-based MySQL database management.
+    - 🧱 **Architecture**: Microservices-based structure, separating the frontend, backend, and database services for modularity, scalability, and maintainability.
+
+    ### 💡 Why Taskit?
+    Taskit aims to offer users a real-world experience with clean UI and full CRUD features:
+    - Register & Login securely using JWT tokens
+    - Create, read, update, and delete tasks
+    - Track task completion with real-time feedback
+    - Built with production-ready principles using APIs and token-based authentication
+
+    🔐 Protected using secure headers and API keys  
+    📦 Deployed on modern cloud platforms for a reliable experience  
+    🧑‍💻 Great for developers, students, or anyone looking to manage tasks simply and effectively
+    """)
