@@ -32,6 +32,7 @@ with st.expander("🔐 Register New Account"):
             st.error(f"❌ Registration failed: {res.json().get('detail', 'Unknown error')}")
 
 # --- Login Section ---
+st.subheader("🔑 Login to Your Account")
 username = st.text_input("Username", key="username")
 password = st.text_input("Password", type="password", key="password")
 
