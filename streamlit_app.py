@@ -87,15 +87,26 @@ if st.session_state.token:
         else:
             st.error(f"❌ Error: {res.json().get('detail', 'Unknown error')}")
 
-# --- View Tasks Section ---
 if st.session_state.token:
     st.subheader("📋 Your Tasks")
+
+    # Inputs for pagination and limiting
+    last_id = st.number_input("Last Task ID (for pagination, optional)", min_value=0, step=1, value=0)
+    limit = st.number_input("Number of tasks to fetch (limit)", min_value=1, max_value=100, step=1, value=10)
+
     if st.button("Load My Tasks"):
         headers = {
             "Authorization": f"Bearer {st.session_state.token}",
             "api-key": API_KEY
         }
-        response = requests.get(f"{BASE_URL}/tasks/", headers=headers)
+
+        # Build params dictionary for query string
+        params = {}
+        if last_id > 0:
+            params["last_id"] = last_id
+        params["limit"] = limit
+
+        response = requests.get(f"{BASE_URL}/tasks/", headers=headers, params=params)
 
         if response.status_code == 200:
             tasks = response.json()
@@ -133,6 +144,8 @@ if st.session_state.token:
             st.success("✅ Task updated successfully!")
         else:
             st.error(f"❌ Update failed: {res.json().get('detail', 'Unknown error')}")
+    
+    
     st.subheader("🗑️ Delete Task")
     task_id_delete = st.number_input("Task ID to Delete", min_value=1, step=1)
 
