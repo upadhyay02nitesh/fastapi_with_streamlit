@@ -103,7 +103,7 @@ if st.session_state.token:
         # Build params dictionary for query string
         params = {}
         if last_id > 0:
-            params["last_id"] = last_id
+            params["last_id"] = last_id-1
         params["limit"] = limit
 
         response = requests.get(f"{BASE_URL}/tasks/", headers=headers, params=params)
