@@ -2,6 +2,12 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
+from fastapi.security import OAuth2PasswordBearer
+
+# This is the URL where your token will be obtained (should match your /token route)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+print(oauth2_scheme)
+
 from dotenv import load_dotenv
 import os
 

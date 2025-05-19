@@ -1,75 +1,89 @@
 import streamlit as st
 import requests
+import os
+from dotenv import load_dotenv
+
+st.set_page_config(page_title="Task Tracker", layout="centered")
 
 st.title("📝 Task Tracker Login")
 
-# --- Login Section ---
-username = st.text_input("Username")
-password = st.text_input("Password", type="password")
-
-from dotenv import load_dotenv
-import os
-
+# --- Load environment ---
 load_dotenv()
-
-def clear_login_inputs():
-    st.session_state["username"] = ""
-    st.session_state["password"] = ""
-
 API_KEY = os.getenv("API_KEY")
-headers = {"api-key": API_KEY}
+BASE_URL = "https://fastapi-with-streamlit-r66r.onrender.com"
+
+# --- Session State Defaults ---
+if "token" not in st.session_state:
+    st.session_state.token = None
+
+# --- Login Section ---
+username = st.text_input("Username", key="username")
+password = st.text_input("Password", type="password", key="password")
+
 if st.button("Login"):
-    response = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/login", data={
+    headers = {"api-key": API_KEY}
+    response = requests.post(f"{BASE_URL}/login", data={
         "username": username,
         "password": password
     }, headers=headers)
-    print(response.status_code)
 
     if response.status_code == 200:
-        token = response.json()["access_token"]
-        st.session_state["token"] = token
+        st.session_state.token = response.json()["access_token"]
         st.success("Login successful!")
-        clear_login_inputs()
-     
     else:
-        st.error("Login failed.")
+        st.error("Login failed. Check your credentials.")
 
-# --- Show Task Form if Logged In ---
-if "token" in st.session_state:
-    st.subheader("Add Task")
+# --- Logout ---
+if st.session_state.get("token"):
+    if st.button("Logout"):
+        headers = {
+            "Authorization": f"Bearer {st.session_state['token']}",
+            "api-key": API_KEY
+        }
+        response = requests.post(f"{BASE_URL}/logout", headers=headers)
 
+        if response.status_code == 200:
+            st.success(response.json().get("message"))
+            # Clear token from session
+            st.session_state["token"] = None
+            # Rerun app to reset view to login form
+            st.experimental_rerun()
+        else:
+            st.error("Logout failed.")
+
+
+# --- Add Task Section ---
+if st.session_state.token:
+    st.subheader("➕ Create Task")
     title = st.text_input("Task Title")
     desc = st.text_area("Task Description")
 
     if st.button("Create Task"):
         headers = {
-            "Authorization": f"Bearer {st.session_state['token']}",
+            "Authorization": f"Bearer {st.session_state.token}",
             "api-key": API_KEY
         }
         task_data = {"title": title, "description": desc}
 
-        res = requests.post("https://fastapi-with-streamlit-r66r.onrender.com/tasks/", json=task_data, headers=headers)
-
+        res = requests.post(f"{BASE_URL}/tasks/", json=task_data, headers=headers)
         if res.status_code == 200:
-            st.success("Task created!")
+            st.success("✅ Task created successfully!")
         else:
-            st.error(f"Error: {res.json().get('detail', 'Unknown error')}")
+            st.error(f"❌ Error: {res.json().get('detail', 'Unknown error')}")
 
-    # Show tasks after task creation
-if "token" in st.session_state:
+# --- View Tasks Section ---
+if st.session_state.token:
     st.subheader("📋 Your Tasks")
-    
     if st.button("Load My Tasks"):
         headers = {
-            "Authorization": f"Bearer {st.session_state['token']}",
+            "Authorization": f"Bearer {st.session_state.token}",
             "api-key": API_KEY
         }
-        response = requests.get("https://fastapi-with-streamlit-r66r.onrender.com/tasks/", headers=headers)
+        response = requests.get(f"{BASE_URL}/tasks/", headers=headers)
 
         if response.status_code == 200:
             tasks = response.json()
             if tasks:
-                # Format tasks for display
                 for task in tasks:
                     task["Status"] = "✅ Done" if task.get("completed") else "❌ Pending"
                 st.dataframe(tasks)
@@ -77,3 +91,45 @@ if "token" in st.session_state:
                 st.info("No tasks found.")
         else:
             st.error("Failed to fetch tasks.")
+
+
+    st.subheader("✏️ Update Task")
+    task_id_update = st.number_input("Task ID to Update", min_value=1, step=1)
+    updated_title = st.text_input("Updated Title")
+    updated_desc = st.text_area("Updated Description")
+    updated_completed = st.checkbox("Completed?")
+
+    if st.button("Update Task"):
+        update_data = {
+            "title": updated_title,
+            "description": updated_desc,
+            "completed": updated_completed
+        }
+        headers = {
+            "Authorization": f"Bearer {st.session_state['token']}",
+            "api-key": API_KEY
+        }
+
+        res = requests.put(f"https://fastapi-with-streamlit-r66r.onrender.com/tasks/{task_id_update}",
+                           json=update_data, headers=headers)
+
+        if res.status_code == 200:
+            st.success("✅ Task updated successfully!")
+        else:
+            st.error(f"❌ Update failed: {res.json().get('detail', 'Unknown error')}")
+    st.subheader("🗑️ Delete Task")
+    task_id_delete = st.number_input("Task ID to Delete", min_value=1, step=1)
+
+    if st.button("Delete Task"):
+        headers = {
+            "Authorization": f"Bearer {st.session_state['token']}",
+            "api-key": API_KEY
+        }
+
+        res = requests.delete(f"https://fastapi-with-streamlit-r66r.onrender.com/tasks/{task_id_delete}",
+                              headers=headers)
+
+        if res.status_code == 200:
+            st.success("🗑️ Task deleted successfully!")
+        else:
+            st.error(f"❌ Delete failed: {res.json().get('detail', 'Unknown error')}")
